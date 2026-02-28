@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sleepywang.accentmap.dao.DialectMapper">
+    <resultMap id="Dialect" type="com.sleepywang.accentmap.entity.Dialect">
+        <id property="dId" column="d_id"/>
+        <result property="dName" column="d_name"/>
+        <result property="lId" column="l_id"/>
+        <association property="language" javaType="com.sleepywang.accentmap.entity.Language">
+            <id property="lId" column="l_id"/>
+            <result property="lName" column="l_name"/>
+        </association>
+    </resultMap>
+    <select id="getDialectByDId" resultMap="Dialect">
+        SELECT d.d_id,d.d_name,l.l_id,l.l_name from dialects d,languages l where d.d_id=#{dId} and l.l_id=d.l_id
+    </select>
+</mapper>

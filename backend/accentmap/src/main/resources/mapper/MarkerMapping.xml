@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sleepywang.accentmap.dao.MarkerMapper">
+    <select id="getAllMarkers" resultType="com.sleepywang.accentmap.entity.Marker">
+        select m.m_id,m.lng,m.lat,m.remark,l.l_id,d.d_id,s.s_id,a.a_id,l.l_name,d.d_name,s.s_name,
+               a.a_name from markers m,languages l,dialects d,subdialects s,accents a where m.l_id=l.l_id and m.d_id=d.d_id
+                and m.s_id=s.s_id and m.a_id=a.a_id
+    </select>
+    <select id="getMarkersByAccent" resultType="com.sleepywang.accentmap.entity.Marker">
+        Select m.m_id,m.lng,m.lat,m.remark,m.l_id,m.d_id,m.s_id,m.a_id,l.l_name,d.d_name,s.s_name,a.a_name
+        from markers m,languages l,dialects d,subdialects s,accents a
+        where m.l_id=l.l_id and m.d_id=d.d_id and m.s_id=s.s_id and
+        m.a_id=a.a_id and l.l_name=#{language}
+        <if test="dialect!='' and dialect!=null">and d.d_name=#{dialect}</if>
+        <if test="subdialect!='' and subdialect!=null">and s.s_name=#{subdialect}</if>
+        <if test="accent!='' and accent!=null">and a.a_name=#{accent}</if>
+    </select>
+</mapper>

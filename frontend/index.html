@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width"/>
+        <title>猜方言直播地图</title>
+        <style>
+            html,
+            body,
+            #container {
+                width: 100%;
+                height: 100%;
+            }
+            #searchBox{
+                /*background-color: red;*/
+                display: inline;
+                /*text-align: right;*/
+                margin-right: 30px;
+            }
+            #searchBox > input
+            {
+                margin-top: 10px;
+            }
+            #toolbox{
+                z-index: 1;
+                position: fixed;
+                /*background-color: gold;*/
+                width: 100%;
+                text-align: right;
+                height: 30px;
+                /*display: flex;*/
+                /*gap: 10px;*/
+            }
+            .textbox{
+
+                width: 280px;
+                padding: 10px 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                border: 1.8px solid #ddd;
+                background: #fff;
+                outline: none;
+                /*box-shadow: 0 4px 12px rgba(0,0,0,0.08);*/
+            }
+            button {
+                padding: 10px 18px;
+                border: none;
+                border-radius: 8px;
+                background: #4a90e2;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.25s ease;
+            }
+
+            button:hover {
+                background: #357bd8;
+            }
+
+            button:active {
+                transform: scale(0.96);
+            }
+            .info{
+                background-color: #fff;
+                text-align: center;
+                padding: 10px;
+                position: relative;
+                border: 1px solid #b9b9b9;
+                font-size: 12px;
+            }
+            #buttoncontainer {
+                /*text-align: center;*/
+                justify-content: center;
+                width: 100%;
+                /*position: fixed;*/
+                /*background-color: #b3d4fc;*/
+                display: flex;
+                gap: 10px;
+                /*display: block;*/
+            }
+            #buttoncontainer button{
+
+                background-color: lightgray;
+                color: black;
+                font-size: 12px;
+            }
+            #dialectSelector{
+                padding-top: 5px;
+                padding-left: 10px;
+                padding-bottom: 15px;
+                z-index: 10;
+                background-color: white;
+                text-align: center;
+                width: 100%;
+                height: 40px;
+            }
+            .dropdown {
+                position: relative;   /* 关键 */
+                width: 200px;
+                display: inline-block;
+            }
+            #dialectSelector .textbox
+            {
+                width: 80px;
+            }
+            .dropdown-content {
+                position: absolute;
+                top: 100%;
+                left: 90px;
+                width: 100px;
+                background: #fff;
+                border: 1px solid #ccc;
+                box-shadow: 0 2px 6px rgba(0,0,0,.15);
+                max-height: 160px;
+                overflow-y: auto;
+                display: none;
+                z-index: 1000;
+            }
+            .dropdown-content div {
+                padding: 6px;
+                cursor: pointer;
+                text-align: left;
+            }
+            .dropdown-content div:hover {
+                background: #eee;
+            }
+        </style>
+    </head>
+    <div id="toolbox">
+        <div id="dialectSelector">
+            <div class="dropdown">
+                <label for="language">大方言区：</label>
+                <input id="language" placeholder="大方言区" class="textbox">
+                <div class="dropdown-content" id="languageList"></div>
+            </div>
+            <div class="dropdown">
+                <label for="dialect">方言片：</label>
+                <input id="dialect" placeholder="方言片" disabled class="textbox dropdown">
+                <div class="dropdown-content" id="dialectList"></div>
+            </div>
+            <div class="dropdown">
+                <label for="subdialect">方言小片：</label>
+                <input id="subdialect" placeholder="方言小片" disabled class="textbox dropdown">
+                <div class="dropdown-content" id="subdialectList"></div>
+            </div>
+            <div class="dropdown">
+                <label for="accent">口音：</label>
+                <input id="accent" placeholder="口音" disabled class="textbox dropdown">
+                <div class="dropdown-content" id="accentList"></div>
+            </div>
+            <button>筛选⏳</button>
+        </div>
+        <div id="searchBox">
+            <button id="mark">定点📌</button>
+            <button id="ruler">测距📏</button>
+            <button id="select">框选✍️</button>
+            <input type="text" class="textbox" id="searchtext">
+            <button id="searchbutton">搜索🔍</button>
+        </div>
+    </div>
+    <div id="container">
+
+    </div>
+</html>
+<script type="text/javascript">
+    window._AMapSecurityConfig = {
+        securityJsCode: "a90a0d235b16dee00b11f37472f5f82b",
+    };
+</script>
+<script src="https://webapi.amap.com/maps?v=2.0&key=d6a335196087756573283d2d54de704b"></script>
+<script src="index.js"></script>

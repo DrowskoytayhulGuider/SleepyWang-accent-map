@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sleepywang.accentmap.dao.SubDialectMapper">
+
+    <resultMap id="SubDialect" type="com.sleepywang.accentmap.entity.SubDialect">
+        <id property="sId" column="s_id"/>
+        <result property="sName" column="s_name"/>
+        <result property="dId" column="d_id"/>
+        <association property="dialect" javaType="com.sleepywang.accentmap.entity.Dialect">
+            <id property="dId" column="d_id"/>
+            <result property="dName" column="d_name"/>
+            <result property="lId" column="l_id"/>
+            <association property="language" javaType="com.sleepywang.accentmap.entity.Language">
+                <id property="lId" column="l_id"/>
+                <result property="lName" column="l_name"/>
+            </association>
+        </association>
+    </resultMap>
+    <select id="getSubDialectBySId" resultMap="SubDialect">
+        SELECT s.s_id,s.s_name,d.d_id,d.d_name,l.l_id,l.l_name from subdialects s,dialects d,languages l where s.d_id=d.d_id and l.l_id=d.l_id and s.s_id=#{sId}
+    </select>
+</mapper>
