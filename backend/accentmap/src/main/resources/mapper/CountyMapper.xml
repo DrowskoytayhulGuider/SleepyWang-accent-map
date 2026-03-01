@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sleepywang.accentmap.dao.CountyMapper">
+
+    <select id="getCountiesByAccent" resultType="com.sleepywang.accentmap.entity.County">
+        Select MIN(c.c_id) AS c_id,
+        c.c_name,
+        MIN(c.adcode) AS adcode,
+        c.polygon from counties c,county_dialect cd,languages l,
+        dialects d,subdialects s,accents a where c.c_id=cd.c_id and cd.l_id=l.l_id and cd.d_id=d.d_id and cd.s_id=s.s_id and
+        cd.a_id=a.a_id and l.l_name=#{language}
+        <if test="dialect!='' and dialect!=null">and d.d_name=#{dialect}</if>
+        <if test="subDialect!='' and subDialect!=null">and s.s_name=#{subDialect}</if>
+        <if test="accent!='' and accent!=null">and a.a_name=#{accent}</if> group by c.c_name,c.polygon
+    </select>
+</mapper>
