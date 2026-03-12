@@ -14,8 +14,10 @@
 
       <ul v-if="selectedLanguages.length" ref="listRef">
         <li v-for="language in selectedLanguages" :key="language.lid">
-          <input type="text" v-model="language.lname" class="textbox">
-          <a @click="change(language)">修改</a><a @click="deleteLanguage(language)">删除</a><router-link :to="'/dialects/'+language.lid">查看下属方言片</router-link>
+          <input type="text" v-model="language.lname" class="textbox" style="width: 100px">
+          <div>
+            <a @click="change(language)">修改</a><a @click="deleteLanguage(language)">删除</a><router-link :to="'/dialects/'+language.lid">查看下属方言片</router-link>
+          </div>
         </li>
       </ul><br>
 
@@ -96,70 +98,129 @@ onMounted(async ()=>{
 </script>
 
 <style scoped>
+/* ---------- 全局容器 ---------- */
 #view-container{
   width: 100vw;
-  height: 100vh;
-  background-color: rgba(255,241,241,0.8);
+  min-height: 100vh;
+  /*background-color: rgba(255,241,241,0.8);*/
+  background-color: #4a90e2;
   text-align: center;
 }
-a,:deep(a)
-{
-  margin-left: 20px;
-  font-size: 12px;
+
+.content{
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*align-items: center;*/
+  text-align: left;
+  /*width: 100%;*/
+  height: 100%;
+  max-width: 600px;
+  padding-left: 8%;
+  margin: 0 auto;
+  /*padding: 1rem;*/
+  background-color: rgba(241,250,225,0.8);
+  border-radius: 0.5rem;
+}
+
+/* ---------- 链接 ---------- */
+a, :deep(a){
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
 }
 a:hover{
   cursor: pointer;
 }
+
+/* ---------- 标题 ---------- */
 .title{
-  margin-top: 10px;
-  font-size: 20px;
+  margin-top: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
-ul{
-  /*background-color: white;*/
-  margin-top: 10px;
-  display: inline-block;
-  width: 60%;
-  max-height: 500px;
-  overflow-y: auto;    /* 超出显示纵向滚动条 */
-  overflow-x: hidden;  /* 防止横向滚动条 */;
-}
-li{
-  margin-top: 10px;
-}
-.textbox{
-  width: 90px;
-  display: inline-block;
-  /*background-color: #4a90e2;*/
-  font-size: 16px;
-  padding: 2px;
-  text-align: center;
-}
-.content{
-  display: inline-block;
-  width: 60%;
-  height: 100%;
-  background-color: rgba(241,250,225,80%);
 
+/* ---------- 表头 ---------- */
+#properties{
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 1rem;
+  padding-left: 0.5rem;
 }
-button{
-  /*position: absolute;*/
-  /*top: 90%;*/
-  /*left: 47%;*/
-  /*background-color: rgb(76, 175, 80)*/
-  margin-left: 10px;
+
+#properties span{
+  /*flex: 2;*/
+  text-align: center;
+  display: inline-block;
+  width: 100px;
+  margin-right: 10px;
+  background-color: rgba(155,220,255,0.8);
+  padding: 0.3rem;
+  border-radius: 0.3rem;
 }
+
+/* ---------- 搜索/添加 ---------- */
+#search-container,
 #add-container{
-  margin-top: 10px;
-}
-#search-container
-{
-  margin-top: 10px;
-}
-div > .textbox{
-  padding-top: 10px;
-  padding-bottom: 10px;
-  width: 250px;
+  width: 100%;
   text-align: left;
 }
+#add-container .textbox,
+#search-container .textbox{
+  width: 200px;
+}
+
+
+/* ---------- 列表 ---------- */
+ul{
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 700px;
+  height: 100%;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+li{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+li input{
+  margin-left: 5px;
+  margin-right: 5px;
+}
+/*li input,li div{*/
+/*  flex: 1;*/
+/*}*/
+
+/*li input{*/
+/*  width: 220px;*/
+/*}*/
+/* ---------- 按钮 ---------- */
+button{
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  border-radius: 0.3rem;
+  border: none;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-width: 80px;
+}
+button:hover{
+  background-color: #357bd8;
+}
+button:active{
+  transform: scale(0.96);
+}
+
+
 </style>

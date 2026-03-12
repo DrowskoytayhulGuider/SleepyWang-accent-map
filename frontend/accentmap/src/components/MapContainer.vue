@@ -1,6 +1,8 @@
 <template>
-  <Toolbox v-if="map" :map="map"/>
-  <div id="container"></div>
+  <div id="tool-container">
+    <Toolbox v-if="map" :map="map"/>
+    <div id="container"></div>
+  </div>
 
 
 </template>
@@ -31,8 +33,9 @@ onUnmounted(() => {
 
 <style  scoped>
 
-  /*Toolbox{*/
-  /*  width: 1000px;*/
-  /*  background-color: #4a90e2;*/
+  /*#tool-container{*/
+  /*  width: 20vw;*/
+  /*  z-index: 10;*/
+  /*  !*display: inline-block;*!*/
   /*}*/
 </style>

@@ -3,39 +3,42 @@
   <div id="view-container">
     <div class="content">
       <div id="search-container">
-        <input type="text" placeholder="搜索关键词" class="textbox" v-model="searchAccent">
+        <input type="text" placeholder="搜索关键词" class="textbox" v-model="searchAccent" style="width: 200px">
         <button @click="search" id="searchAccent">搜索🔍</button>
       </div>
       <div id="add-container" >
-        <input type="text" placeholder="输入要添加的口音名称" class="textbox" v-model="newAName">
+        <input type="text" placeholder="输入要添加的口音名称" class="textbox" v-model="newAName" style="width: 100px">
         <DroppableInput
             v-model="selectedSubdialect"
             :filteredList="filteredSubdialects"
             :clickHandler="onLClick"
             :itemClick="liOnClick"
             placeholder="输入其所属方言小片"
-            :inputStyle="'padding-top: 10px;padding-bottom: 10px;width: 200px;text-align: left;margin-right: 10px'"
             :field="'sname'"
+            :input-style="'width:100px'"
         />
 
         <button @click="add" id="addSubdialect">添加➕</button>
       </div>
       <div class="title">当前数据库中口音如下（共{{accents.length}}个）：</div>
       <div id="properties">
-        <span>口音</span><span>方言小片</span><span style="width: 180px">操作</span>
+        <span>口音</span><span>方言小片</span><span style="width: 100px">操作</span>
       </div>
       <ul v-if="selectedAccents.length" ref="listRef">
         <li v-for="accent in selectedAccents" :key="selectedAccents.aid">
-          <input type="text" v-model="accent.aname" class="textbox">
+          <input type="text" v-model="accent.aname" class="textbox" style="width: 100px">
           <DroppableInput
               v-model="listSelectedSubdialects[accent.aid]"
               :filteredList="filterListSubdialects(accent.aid)"
               :clickHandler="() => onListLClick(accent)"
               :itemClick="(subdialect) => listLiOnClick(subdialect, accent)"
-              :inputStyle="'width:120px;display:inline-block;font-size:16px;padding:2px;text-align:center;margin-right:10px;'"
               :field="'sname'"
+              :input-style="'width:100px'"
           />
-          <a @click="change(accent)">修改</a><a @click="deleteAccent(accent)">删除</a>
+          <div>
+            <a @click="change(accent)">修改</a><a @click="deleteAccent(accent)">删除</a>
+          </div>
+
         </li>
       </ul><br>
 
@@ -210,97 +213,137 @@ onMounted(async ()=>{
 </script>
 
 <style scoped>
-#properties{
-  /*background-color: white;*/
-  display: inline-block;
-  width: 60%;
-  text-align: left;
-  /*padding-left: 87px;*/
-}
-span{
-  text-align: center;
-  display: inline-block;
-  width: 120px;
-  margin-right: 10px;
-  background-color: rgba(155,220,255,0.8);
-}
-
 #view-container{
   width: 100vw;
-  height: 100vh;
-  background-color: rgba(255,241,241,0.8);
+  min-height: 100vh;
+  /*background-color: rgba(255,241,241,0.8);*/
+  background-color: #4a90e2;
   text-align: center;
 }
-a,:deep(a)
-{
-  margin-left: 20px;
-  font-size: 12px;
+
+.content{
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*align-items: center;*/
+  text-align: left;
+  /*width: 100%;*/
+  height: 100%;
+  max-width: 600px;
+  padding-left: 8%;
+  margin: 0 auto;
+  /*padding: 1rem;*/
+  background-color: rgba(241,250,225,0.8);
+  border-radius: 0.5rem;
+}
+
+/* ---------- 链接 ---------- */
+a, :deep(a){
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
 }
 a:hover{
   cursor: pointer;
 }
+
+/* ---------- 标题 ---------- */
 .title{
-  margin-top: 10px;
-  font-size: 20px;
+  margin-top: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
-ul{
-  /*background-color: white;*/
-  margin-top: 10px;
-  display: inline-block;
-  width: 60%;
-  max-height: 500px;
-  overflow-y: auto;    /* 超出显示纵向滚动条 */
-  overflow-x: hidden;  /* 防止横向滚动条 */;
-  text-align: left;
-}
-li{
-  margin-top: 10px;
-}
-.textbox{
-  width: 120px;
-  display: inline-block;
-  /*background-color: #4a90e2;*/
-  font-size: 16px;
-  padding: 2px;
-  text-align: center;
-  margin-right: 10px;
-}
-.content{
-  display: inline-block;
-  width: 60%;
-  height: 100%;
-  background-color: rgba(241,250,225,80%);
 
+/* ---------- 表头 ---------- */
+#properties{
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 1rem;
+  padding-left: 0.5rem;
 }
-button{
-  /*position: absolute;*/
-  /*top: 90%;*/
-  /*left: 47%;*/
-  /*background-color: rgb(76, 175, 80)*/
-  margin-left: 10px;
+
+#properties span{
+  /*flex: 2;*/
+  text-align: center;
+  display: inline-block;
+  width: 100px;
+  margin-right: 10px;
+  background-color: rgba(155,220,255,0.8);
+  padding: 0.3rem;
+  border-radius: 0.3rem;
 }
+
+/* ---------- 搜索/添加 ---------- */
+#search-container,
 #add-container{
-  margin-top: 10px;
-}
-#search-container
-{
-  margin-top: 10px;
+  width: 100%;
+  text-align: left;
 }
 #search-container .textbox{
-  width: 410px;
+  width: 25%;
 }
-div > .textbox{
-  padding-top: 10px;
-  padding-bottom: 10px;
-  width: 200px;
-  text-align: left;
+
+
+/* ---------- 列表 ---------- */
+ul{
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 700px;
+  height: 100%;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 500px;
 }
+
+li{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+li input{
+  margin-left: 5px;
+  margin-right: 5px;
+}
+/*li input,li div{*/
+/*  flex: 1;*/
+/*}*/
+
+/*li input{*/
+/*  width: 220px;*/
+/*}*/
+/* ---------- 按钮 ---------- */
+button{
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  border-radius: 0.3rem;
+  border: none;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-width: 80px;
+}
+button:hover{
+  background-color: #357bd8;
+}
+button:active{
+  transform: scale(0.96);
+}
+
+/* ---------- 下拉 ---------- */
 .dropdown{
   width: auto;
 }
+
 .dropdown-content{
   max-height: 200px;
   width: 150px;
+  overflow-y: auto;
 }
+
 </style>

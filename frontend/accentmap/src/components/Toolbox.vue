@@ -1,7 +1,11 @@
 <template>
   <toast ref="toastRef"/>
+  <div id="selector" @click="menuOnClick">
+    <MenuOutlined style="color: white"/>
+  </div>
   <div id="toolbox">
-    <div id="dialectSelector" @click="closeDropdown">
+    <transition name="menu">
+    <div id="dialectSelector" v-show="isShowingMenu" @click="closeDropdown" :class="{open:open}">
       <label>大方言区：</label>
       <DroppableInput
           v-model="selectedLanguage"
@@ -11,7 +15,9 @@
           @input="onLInput"
           :placeholder="'大方言区'"
           :field="'lname'"
+          :input-style="'margin-bottom: 5%;margin-top: 10%'"
       />
+      <br>
       <label>方言片：</label>
       <DroppableInput
           v-model="selectedDialect"
@@ -21,7 +27,9 @@
           @input="onDInput"
           :placeholder="'方言片'"
           :field="'dname'"
+          :input-style="'margin-bottom: 5%'"
       />
+      <br>
       <label>方言小片：</label>
       <DroppableInput
           v-model="selectedSubdialect"
@@ -31,7 +39,9 @@
           @input="onSInput"
           :placeholder="'方言小片'"
           :field="'sname'"
+          :input-style="'margin-bottom: 5%'"
       />
+      <br>
       <label>口音：</label>
       <DroppableInput
           v-model="selectedAccent"
@@ -41,11 +51,18 @@
           @input="onAInput"
           :placeholder="'口音'"
           :field="'aname'"
+          :input-style="'margin-bottom: 5%'"
       />
-      <button @click="findCountiesByDialects">筛选⏳</button>
-      <button @click="clearPolygon(true)">清空❌</button>
-      <router-link to="/backend" id="enter-backend">进入后台...</router-link>
+      <br>
+      <router-link to="/backend" id="enter-backend">进入后台...</router-link><br>
+      <div style="text-align: center">
+        <button @click="findCountiesByDialects">筛选⏳</button>
+        <button @click="clearPolygon(true)">清空❌</button>
+      </div>
+
+
     </div>
+    </transition>
     <div id="searchBox">
       <button id="mark" @click="markOnClick">定点📌</button>
       <button id="ruler" @click="rulerOnClick">测距📏</button>
@@ -62,7 +79,7 @@ import request from "@/utils/request.js";
 import DroppableInput from "@/components/DroppableInput.vue";
 import pako from 'pako';
 import Toast from "@/components/Toast.vue";
-
+import { MenuOutlined } from '@ant-design/icons-vue'
 const props = defineProps({
   map: Object,
 })
@@ -84,7 +101,7 @@ let selectedDialect=ref({dname:null,did:35});
 let selectedSubdialect=ref({sname:null,sid:34});
 let selectedAccent=ref({aname:null,aid:260});
 let toastRef=ref(null)
-
+let isShowingMenu=ref(false);
 let isMarkOn = 0
 let isSelectOn = 0
 let isRulerOn = 0
@@ -117,7 +134,7 @@ const infoWindowContent=[
   "<div id='infotext' style='text-align: center;font-size:15px '>",
   "</div><hr>",
   "<div id='position' >坐标：</div>",
-  "<div id='markerDialect'>方言：（请用地图最顶端的方言筛选框输入）",
+  "<div id='markerDialect'>方言：（请用菜单里的方言筛选框输入）",
   "<input type='text' id='language-info' class='info-text' disabled>",
   "<input type='text' id='dialect-info' class='info-text' disabled>",
   "<input type='text' id='subdialect-info' class='info-text' disabled>",
@@ -125,7 +142,7 @@ const infoWindowContent=[
   "<a id='clear-dialect-info'>清空❌</a>",
   "</div>",
   "<div id='remarkbox'>备注：",
-  "<textarea id='remark' class='textbox'></textarea>",
+  "<textarea id='remark' class='textbox' style='width: 280px;'></textarea>",
   "</div>",
   "<div id='buttoncontainer'>",
   "<button id='deleteMarker'>删除🗑️</button>",
@@ -135,7 +152,7 @@ const infoWindowContent=[
   "</div>",];
 const countyInfoWindowContent=[
   "<div class='info'>",
-  "<div id='infotext' style='text-align: center;font-size:15px '>",
+  "<div id='infotext' style='text-align: center;font-size:12px '>",
   "</div><hr>",
   "<div id='adcode-info'>行政编码：</div>",
   "<div id='markerDialect'>方言：",
@@ -144,7 +161,7 @@ const countyInfoWindowContent=[
   "<input type='text' id='dialect-info' class='info-text' disabled>",
   "<input type='text' id='subdialect-info' class='info-text' disabled>",
   "<input type='text' id='accent-info' class='info-text' disabled>",
-  "<a id='add-dialect'>添加➕（请用地图最顶端的方言筛选框输入）</a>",
+  "<a id='add-dialect'>添加➕（请用菜单里的方言筛选框输入）</a>",
   "<a id='clear-dialect-info'>清空❌</a>",
   "</div>",
   "<div id='buttoncontainer'>",
@@ -153,6 +170,11 @@ const countyInfoWindowContent=[
   "</div>",];
 
 let infoWindow,countyInfoWindow;
+function menuOnClick()
+{
+  console.log(isShowingMenu.value)
+  isShowingMenu.value = !isShowingMenu.value;
+}
 function clearSelectionBox(needClearInfo=true)
 {
   selectedLanguage.value = ({lname: null,lid:24})
@@ -723,6 +745,10 @@ onMounted(async () => {
       start,
       e.lnglat
     ])
+    if(textHeads[textHeads.length-1].next)
+      computeDis(start,e.lnglat,textHeads[textHeads.length-1].next.text)
+    else
+      computeDis(start,e.lnglat,textHeads[textHeads.length-1].text)
   })
   props.map.on('click', async (e) => {
     closeDropdown()
@@ -887,12 +913,16 @@ onMounted(async () => {
         }
         props.map.add(segment.segment);
         props.map.add(point.point);
+
         pointHeads.push(point)
         let textNode={
           text:text,
           next:null
         }
+
         textHeads.push(textNode)
+        //  TODO
+        props.map.add(textNode.text)
         point.point.on('click',()=>{
           let p=point;
           while(p!==null)
@@ -924,7 +954,14 @@ onMounted(async () => {
         addOnDragging(point)
       }
       else {
-
+        if(textHeads[textHeads.length-1].next)
+        {
+          props.map.remove(textHeads[textHeads.length-1].next.text)
+        }
+        else
+        {
+          props.map.remove(textHeads[textHeads.length-1].text)
+        }
         let circleMarker = new AMap.CircleMarker({
           center: e.lnglat,
           radius: 7,
@@ -969,6 +1006,8 @@ onMounted(async () => {
           text:text,
           next:textHeads[textHeads.length-1].next
         }
+        //TODO
+        props.map.add(text)
         props.map.add(segment.segment);
         props.map.add(point.point);
         pointHeads[pointHeads.length-1].next=point;
@@ -1019,6 +1058,14 @@ onMounted(async () => {
     else {
       segmentHeads[segmentHeads.length-2].next=lastSegment.next
       pointHeads[pointHeads.length-1].next.nextSegment=null;
+    }
+    if(textHeads[textHeads.length-1].next)
+    {
+      props.map.remove(textHeads[textHeads.length-1].next.text);
+    }
+    else
+    {
+      props.map.remove(textHeads[textHeads.length-1].text);
     }
   });
 
