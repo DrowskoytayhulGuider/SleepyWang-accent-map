@@ -68,7 +68,7 @@
       <button id="ruler" @click="rulerOnClick">测距📏</button>
       <button id="select" @click="selectOnClick">框选✍️</button>
       <input type="text" class="textbox" id="searchtext" ref="searchInput">
-      <button id="searchbutton" @click="searchPlace">搜索🔍</button>
+      <button id="searchbutton" @click="searchKeyword">搜索🔍</button>
     </div>
   </div>
 </template>
@@ -90,6 +90,7 @@ let markers = []
 let geocoder=null;
 let isDrawingSegment=false;
 let pointHeads=[];
+let selectedArea,selectedAdcodes=[];
 let segmentHeads=[];
 let textHeads=[];
 let languages=ref([]);
@@ -194,9 +195,11 @@ function clearPolygon(needCleanSelections) {
     clearSelectionBox()
   }
   closeCountyInfoWindow()
-  props.map.remove(polygons)
+  // props.map.remove(polygons)
+  selectedArea.setAdcode([])
+  // props.map.remove(selectedArea);
+  selectedAdcodes.length=0;
   for (let marker of markers) {
-
     marker.marker.setIcon(new AMap.Icon({
       size: new AMap.Size(25, 34),
       image: 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
@@ -345,9 +348,19 @@ async function languageOnClick() {
 
 async function findCountiesByDialects()
 {
-  clearPolygon(false)
-  //console.log(selectedLanguage.value.lname+","+selectedDialect.value.dname+","+selectedSubdialect.value.sname+","+selectedAccent.value.aname)
-  const counties=(await request.get("/accent/counties", {
+  // clearPolygon(false)
+  selectedArea.setAdcode([])
+  polygons.length=0
+  // props.map.remove(selectedArea);
+  for (let marker of markers) {
+    marker.marker.setIcon(new AMap.Icon({
+      size: new AMap.Size(25, 34),
+      image: 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
+      imageSize: new AMap.Size(25, 34)
+    }));
+  }
+
+   const counties=(await request.get("/accent/counties", {
     params: {
       language: selectedLanguage.value.lname,
       dialect: selectedDialect.value.dname,
@@ -355,13 +368,17 @@ async function findCountiesByDialects()
       accent: selectedAccent.value.aname,
     }
   })).data
+  selectedAdcodes.length=0;
   for(let county of counties)
   {
     let paths=JSON.parse(county.polygon).features[0].geometry.coordinates[0];
-    drawPolygon(paths,0)
+    selectedAdcodes.push(county.adcode);
+    getPolygonFromDatabase(paths,0)
   }
-
+  selectedArea.setAdcode(selectedAdcodes)
+  // props.map.add(selectedArea)
   props.map.setFitView(polygons);
+
   let findMarkers=(await request.get("/marker/markers/accent", {
     params: {
       language: selectedLanguage.value.lname,
@@ -411,7 +428,7 @@ function getPolygon(adcode,paths) {
   });
 }
 
-function drawPolygon(paths,needClear)
+function getPolygonFromDatabase(paths, needClear)
 {
   if (needClear) clearPolygon(false);
   if(paths.length) {
@@ -425,7 +442,8 @@ function drawPolygon(paths,needClear)
       });
       polygons.push(polygon);
     })
-    props.map.add(polygons);
+
+    // props.map.add(polygons);
   }
 }
 
@@ -433,7 +451,7 @@ function selectOff()
 {
   isSelectOn=0;
   document.getElementById("select").textContent="框选✍️";
-  clearPolygon(false);
+  // clearPolygon(false);
 }
 function selectOn()
 {
@@ -462,11 +480,42 @@ function markOn()
 {
   isMarkOn=1;
 }
-
-function searchPlace() {
+function searchKeyword() {
+  let keyword=searchInput.value.value;
+  district.search(keyword, (status, result) => {
+    if (
+        status === 'complete' &&
+        result.districtList &&
+        result.districtList.length > 0 &&
+        result.districtList[0].level!=='street'
+    ) {
+      // drawDistrict(result.districtList[0])
+      console.log(result.districtList[0].level)
+      const bounds = result.districtList[0].boundaries
+      if (!bounds) return
+      polygons.length=0;
+      bounds.forEach(boundary => {
+        polygons.push(
+          new AMap.Polygon({
+            path: boundary,
+            strokeColor: "#FF33FF",
+            strokeWeight: 2,
+            fillOpacity: 0.2,
+            fillColor: "#1791fc",
+          })
+        )
+      })
+      selectedArea.setAdcode(result.districtList[0].adcode);
+      props.map.setFitView(polygons);
+    } else {
+      searchPlace(keyword)
+    }
+  })
+}
+function searchPlace(address) {
   AMap.plugin("AMap.Geocoder", function () {
-    const address = searchInput.value.value;
-    const geocoder = new AMap.Geocoder()
+    // if(address.contains())
+    // const geocoder = new AMap.Geocoder()
     if (address === '') return
 
     geocoder.getLocation(address, async (_, result) => {
@@ -530,6 +579,7 @@ function selectOnClick()
   if(isSelectOn)
   {
     selectOff();
+    clearPolygon(false);
   }
   else
   {
@@ -546,25 +596,6 @@ function computeDis(p1,p2,text){
   text.setText(distance/1000+'km')
   text.setPosition(textPos)
 }
-
-// function deleteRuler()
-// {
-//   for(let i=0;i<points.length;++i)
-//   {
-//     props.map.remove(points[i]);
-//   }
-//   for(let i=0;i<lines.length;++i)
-//   {
-//     lines[i].setMap(null);
-//   }
-//   for(let i=0;i<texts.length;++i)
-//   {
-//     texts[i].setMap(null);
-//   }
-//   points.length=0;
-//   lines.length=0;
-//   texts.length=0;
-// }
 
 async function saveInfo(mid,fullMarker)
 {
@@ -696,6 +727,24 @@ async function addMarker(mid,lnglat,remark='', accent = null,needAddToDatabase=t
 
 
 onMounted(async () => {
+  selectedArea = new AMap.DistrictLayer.Province({
+    zIndex: 10,
+    zooms: [2, 15],
+    adcode: [],
+    depth: 2,
+    opacity: 0.4,
+  });
+
+  selectedArea.setStyles({
+    "stroke-width": 2, //描边线宽
+    fill: function (data) {
+      return "rgb(180,250,200)";
+    },
+    "county-stroke": "rgb(100,180,160)",
+  });
+
+
+  props.map.add(selectedArea);
   AMap.plugin("AMap.Geocoder", () => {
     geocoder = new AMap.Geocoder();
   })
@@ -781,7 +830,7 @@ onMounted(async () => {
                   properties: {adcode:result.regeocode.addressComponent.adcode},
                   geometry: {
                     type: "Polygon",
-                    coordinates: [paths]  // 高德地图返回的边界数据
+                    coordinates: [paths]
                   }
                 }
               ]
@@ -796,8 +845,16 @@ onMounted(async () => {
           {
             paths=JSON.parse(counties[0].polygon).features[0].geometry.coordinates[0];
           }
-          drawPolygon(paths,1)
+
+          selectedAdcodes.length=0
+          selectedAdcodes.push(result.regeocode.addressComponent.adcode)
+          console.log(selectedAdcodes)
+          getPolygonFromDatabase(paths,1)
+          selectedArea.setAdcode(result.regeocode.addressComponent.adcode)
+          console.log(selectedArea)
+          // props.map.add(selectedArea)
           props.map.setFitView(polygons);
+
           countyInfoWindow.open(props.map,lnglat)
           clearSelectionBox();
           document.getElementById("language-info").value="";

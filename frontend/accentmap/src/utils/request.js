@@ -5,8 +5,8 @@ const request = axios.create({
 })
 
 request.interceptors.request.use(config => {
-    config.baseURL = //'/api'
-    'http://localhost:8080/api'
+    config.baseURL = '/api'
+    // 'http://localhost:8080/api'
     return config
 })
 
