@@ -743,7 +743,33 @@ onMounted(async () => {
     "county-stroke": "rgb(100,180,160)",
   });
 
-
+  const deleteTail=()=>{
+    isDrawingSegment=false;
+    if(!segmentHeads.length||!segmentHeads[segmentHeads.length-1])return
+    let lastSegment=segmentHeads[segmentHeads.length-1].next;
+    if(!segmentHeads[segmentHeads.length-1].next)
+    {
+      lastSegment=segmentHeads[segmentHeads.length-1]
+    }
+    segmentHeads.push(null)
+    props.map.remove(lastSegment.segment);
+    if(!segmentHeads[segmentHeads.length-2].next) {
+      segmentHeads[segmentHeads.length-2]=lastSegment.next;
+      pointHeads[pointHeads.length-1].nextSegment=null;
+    }
+    else {
+      segmentHeads[segmentHeads.length-2].next=lastSegment.next
+      pointHeads[pointHeads.length-1].next.nextSegment=null;
+    }
+    if(textHeads[textHeads.length-1].next)
+    {
+      props.map.remove(textHeads[textHeads.length-1].next.text);
+    }
+    else
+    {
+      props.map.remove(textHeads[textHeads.length-1].text);
+    }
+  }
   props.map.add(selectedArea);
   AMap.plugin("AMap.Geocoder", () => {
     geocoder = new AMap.Geocoder();
@@ -981,6 +1007,8 @@ onMounted(async () => {
         //  TODO
         props.map.add(textNode.text)
         point.point.on('click',()=>{
+
+          deleteTail()
           let p=point;
           while(p!==null)
           {
@@ -1097,33 +1125,7 @@ onMounted(async () => {
     }
   })
   props.map.on('rightclick', () => {
-    // deleteRuler();
-    isDrawingSegment=false;
-    if(!segmentHeads.length)return
-    let lastSegment=segmentHeads[segmentHeads.length-1].next;
-    if(!segmentHeads[segmentHeads.length-1].next)
-    {
-      lastSegment=segmentHeads[segmentHeads.length-1]
-    }
-    segmentHeads.push(null)
-    props.map.remove(lastSegment.segment);
-
-    if(!segmentHeads[segmentHeads.length-2].next) {
-      segmentHeads[segmentHeads.length-2]=lastSegment.next;
-      pointHeads[pointHeads.length-1].nextSegment=null;
-    }
-    else {
-      segmentHeads[segmentHeads.length-2].next=lastSegment.next
-      pointHeads[pointHeads.length-1].next.nextSegment=null;
-    }
-    if(textHeads[textHeads.length-1].next)
-    {
-      props.map.remove(textHeads[textHeads.length-1].next.text);
-    }
-    else
-    {
-      props.map.remove(textHeads[textHeads.length-1].text);
-    }
+    deleteTail()
   });
 
 })
